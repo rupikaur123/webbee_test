@@ -37,7 +37,64 @@ class CreateCinemaSchema extends Migration
      */
     public function up()
     {
-        throw new \Exception('implement in coding task 4, you can ignore this exception if you are just running the initial migrations.');
+
+        Schema::create('locations', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('movies', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('movies_seat_types', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->timestamps();
+        });
+
+        Schema::create('movie_locations_seats', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('location_id');
+            $table->unsignedBigInteger('movie_id');
+            $table->unsignedBigInteger('seat_type');
+            $table->string('slot')->comment('time for the show');
+            $table->decimal('price', 9, 3);
+            $table->string('seats_available');
+            $table->string('seats_booked');
+            $table->string('seat_premium');
+            $table->timestamps();
+
+            $table->foreign('location_id')
+            ->references('id')->on('locations')->onDelete('cascade');
+            $table->foreign('movie_id')
+            ->references('id')->on('movies')->onDelete('cascade');
+
+            $table->foreign('seat_type')
+            ->references('id')->on('movies_seat_types')->onDelete('cascade');
+        });
+
+        Schema::create('movie_bookings_detail', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('movie_locations_seats_id');
+            $table->unsignedBigInteger('seat_type');
+            $table->string('seat_number');
+            $table->decimal('final_price', 9, 3);
+            $table->timestamps();
+
+            $table->foreign('user_id')
+            ->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('movie_locations_seats_id')
+            ->references('id')->on('movie_locations_seats')->onDelete('cascade');
+
+        });
+
+
+       // throw new \Exception('implement in coding task 4, you can ignore this exception if you are just running the initial migrations.');
     }
 
     /**
