@@ -12,4 +12,9 @@ class Event extends Model
     {
         return $this->hasMany(Workshop::class,'event_id','id');
     }
+
+    public function futureWorkshops()
+    {
+        return $this->hasMany(Workshop::class,'event_id','id')->whereDate('start', '>', now()->format('Y-m-d H:i:s'));
+    }
 }
