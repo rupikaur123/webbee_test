@@ -96,7 +96,7 @@ class MenuController extends BaseController
 
     public function getMenuItems() {
         try {
-            $menu = MenuItem::with('children')->get();
+            $menu = MenuItem::with('children')->whereNull('parent_id')->get();
 
             return response()->json($menu);exit;
         
