@@ -10,7 +10,7 @@ class MenuItem extends Model
 {
     public function childrenNested()
     {
-        return $this->hasMany(MenuItem::class,'parent_id','id');
+        return $this->hasMany(MenuItem::class,'parent_id','id')->whereNotNull('parent_id');
     }
 
     public function children()
