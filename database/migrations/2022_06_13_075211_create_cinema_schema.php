@@ -41,55 +41,79 @@ class CreateCinemaSchema extends Migration
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('lat');
+            $table->string('long');
+            $table->enum('status', ['0','1'])->default('1')->comment('0=inactive');
             $table->timestamps();
+        });
+
+        Schema::create('cinema', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('location_id');
+            $table->string('name');
+            $table->enum('status', ['0','1'])->default('1')->comment('0=inactive');
+            $table->timestamps();
+
+            $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
         });
 
         Schema::create('movies', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->enum('status', ['0','1'])->default('1')->comment('0=inactive');
             $table->timestamps();
         });
 
         Schema::create('movies_seat_types', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->timestamps();
-        });
-
-        Schema::create('movie_locations_seats', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('location_id');
-            $table->unsignedBigInteger('movie_id');
-            $table->unsignedBigInteger('seat_type');
-            $table->string('slot')->comment('time for the show');
             $table->decimal('price', 9, 3);
-            $table->string('seats_available');
-            $table->string('seats_booked');
-            $table->string('seat_premium');
+            $table->string('percentage_premium')->nullable();
+            $table->decimal('final_price', 9, 3);
+            $table->enum('status', ['0','1'])->default('1')->comment('0=inactive');
+            $table->timestamps();
+        });
+
+
+        Schema::create('movie_show', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('cinema_id');
+            $table->unsignedBigInteger('movie_id');
+            $table->timestamp('show_start_at')->default(DB::raw('CURRENT_TIMESTAMP'));
+            $table->timestamp('show_ends_at')->nullable();
+            $table->enum('booked', ['0','1'])->default('0')->comment('1=booked');
+            $table->enum('status', ['0','1'])->default('1')->comment('0=inactive');
             $table->timestamps();
 
-            $table->foreign('location_id')
-            ->references('id')->on('locations')->onDelete('cascade');
-            $table->foreign('movie_id')
-            ->references('id')->on('movies')->onDelete('cascade');
-
-            $table->foreign('seat_type')
-            ->references('id')->on('movies_seat_types')->onDelete('cascade');
+            $table->foreign('cinema_id')->references('id')->on('cinema')->onDelete('cascade');
+            $table->foreign('movie_id')->references('id')->on('movies')->onDelete('cascade');
         });
+
+        Schema::create('movie_show_seats', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('seat_type_id');
+            $table->unsignedBigInteger('movie_show_id');
+            $table->string('seat_number');
+            $table->enum('booked', ['0','1'])->default('0')->comment('1=booked');
+            $table->decimal('price', 9, 3);
+            $table->timestamps();
+
+            $table->foreign('seat_type_id')->references('id')->on('movies_seat_types')->onDelete('cascade');
+            $table->foreign('movie_show_id')->references('id')->on('movie_show')->onDelete('cascade');
+        });
+
+        
 
         Schema::create('movie_bookings_detail', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('movie_locations_seats_id');
-            $table->unsignedBigInteger('seat_type');
-            $table->string('seat_number');
+            $table->unsignedBigInteger('movie_show_seats_id');
+            $table->timestamp('booking_date')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->decimal('final_price', 9, 3);
             $table->timestamps();
 
-            $table->foreign('user_id')
-            ->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('movie_locations_seats_id')
-            ->references('id')->on('movie_locations_seats')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('movie_show_seats_id')->references('id')->on('movie_show_seats')->onDelete('cascade');
 
         });
 
