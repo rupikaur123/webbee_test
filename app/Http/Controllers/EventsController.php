@@ -192,7 +192,7 @@ class EventsController extends BaseController
     public function getFutureEventsWithWorkshops() {
 
         try {
-            $futureevent_workshops = Event::with('futureWorkshops')->get();
+            $futureevent_workshops = Event::with('futureWorkshops')->has('futureWorkshops')->get();
            
             return response()->json($futureevent_workshops);exit;
         
